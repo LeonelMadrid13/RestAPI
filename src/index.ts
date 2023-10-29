@@ -1,10 +1,13 @@
 import express, { NextFunction, Request, RequestHandler, Response } from "express";
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
+import { PrismaClient } from "@prisma/client";
 
 dotenv.config();
 const PORT = process.env.PORT;
 const app = express();
+
+const db = new PrismaClient();
 
 app.use(express.json());
 
@@ -28,13 +31,13 @@ const isAuthorized: RequestHandler = (req: Request, res: Response, next: NextFun
 
 
 // CREATE
-app.post('/users', isAuthorized, (req, res) => {
-    const newUser = {
-        id: uuidv4(),
-        name: req.body.name
-    };
-    users["users"].push(newUser);
-    res.json(newUser);
+app.post('/users', isAuthorized, async (req, res) => {
+    const user = await db.user.create({
+        data: {
+            name: req.body.name
+        }
+    });
+    res.json(user);
 });
 
 // READ
